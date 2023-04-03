@@ -1,0 +1,104 @@
+/*
+File name: Project3B
+Created by: Mikayla Conforto	
+Created on: 3/20/2023
+Synopsis: implements the stack class and peforms postfix calculations
+*/
+#include <iostream>
+#include <cstdlib>
+#include <string>
+#include <cstddef>
+#include <stack>
+#include <cmath>
+using namespace std;
+const string SENTINEL = ";";
+// precondition: c is initialized
+// postcondition: returns true if c is '+', '-', '*' or '/'
+bool isOperator(string c);
+// precondition: o1 and o2 are initialized and op is an operator
+// postcondition: returns op(o1, o2), e.g. if op is '-' then returns o1-o2
+int calculate(int o1, int o2, char op);
+// precondition: c is a digit
+// postcondition: returns the integer value of c
+int charToInt(char c);
+int main() {
+	string in;
+	stack<int> operandStack;
+	size_t sent;
+	cout << "Enter a postfix expression (ending with " << SENTINEL << " and press Enter):\n";
+		cin >> in;
+	while (in != SENTINEL) {
+		sent = in.find_first_of(SENTINEL); // validate that values
+		//&operand strings does not contain ending ";"
+			if (sent < in.length())
+			{
+				cout << "\nError, enter the ; character after a space " << endl;
+				exit(1);
+			}
+		if (isOperator(in)) {
+			// pop two numbers from stack and print an error message if the stack
+			//is empty before both numbers are popped(use exit(1) to end the program)
+				int n1, n2;
+				if (operandStack.top() == NULL) {
+					cerr << "Not enough operators!\n";
+					exit(1);
+				}
+				// push the calculation result to the top of operandStack
+				//FIXME:
+				n2 = operandStack.top();
+				operandStack.pop();
+				if (operandStack.empty()) {
+					cerr << "Not enough operands entered for operator: "  << in[0] << endl;
+					exit(1);
+				}
+				n1 = operandStack.top();
+				operandStack.pop();
+				operandStack.push(calculate(n1, n2, in[0]));
+
+
+		}
+		else {
+			// push the number to the top of opernadStack
+			// (pay attention to the data type)
+			int num = stoi(in);
+			operandStack.push(num);
+		}
+		cin >> in;
+	}
+	// pop a number from the top of stack
+	int result;
+	result = operandStack.top();
+	operandStack.pop();
+	if (operandStack.empty()) { // nothing left in the stack
+		cout << "\nThe result is: " << result << endl;
+	}
+	else {// if there are still numbers in the stack, print an error message
+		cerr << "Not enough operators entered!\n";
+	}
+	return 0;
+}
+int calculate(int o1, int o2, char op) {
+	if (op == '-') {
+		return o1 - o2;
+	}
+	if (op == '+') {
+		return o1 + o2;
+	}
+	if (op == '*') {
+		return o1 * o2;
+	}
+	if (op == '/') {
+		if (o2 != 0) {
+			return o1 / o2;
+		}
+		else {
+			cerr << "Cannot divide by zero.\n";
+		}
+	}
+}
+bool isOperator(string c) {
+	return c == "+" || c == "-" || c == "*" || c == "/";
+}
+int charToInt(char c) {
+	return (static_cast<int>(c) - static_cast<int>('0'));
+}
