@@ -1,0 +1,205 @@
+
+#include <iostream> 
+#include <cstddef> 
+#include <string> 
+using namespace std;
+struct Date {
+    int month;
+    int day;
+    int year;
+};
+struct Node
+{
+    string item;
+    int count;
+    Date expiration;
+    Node* link;
+};
+typedef Node* NodePtr;
+void head_insert(NodePtr& head, string an_item, int a_number, Date expiratonDate); //function to 
+//insert a Node at the head of Linked list
+void show_list(NodePtr& head);
+//function to display the node is the list
+NodePtr search(NodePtr head, string an_item);  //search 
+//function, to be implemented for exercise 1
+void insert(NodePtr after_me, string an_item, int a_number); //function to 
+//insert a node after another node, Ex 2
+void remove(NodePtr before, NodePtr discard); //function 
+//to delete a node after "before", Ex 3
+NodePtr searchExpiredItems(NodePtr head, Date a_date); //function 
+//to return a list of expired items, Ex 4
+int main()
+{
+    NodePtr head = NULL;
+    head_insert(head, "Coffee", 25, { 12, 25, 2023 }); //test cases for the expiration dates
+    head_insert(head, "Smoothie", 10, { 12, 25, 2023 });
+    head_insert(head, "Bread", 12, { 12, 25, 2023 });
+    head_insert(head, "Cinnamon Rolls", 30, { 12, 25, 2023 });
+    head_insert(head, "Muffin", 18, { 12, 25, 2023 });
+    head_insert(head, "Almond Croissant", 25, { 12, 25, 2023 });
+
+    cout << "List contains:" << endl;
+    show_list(head);
+    string target;
+    cout << "Enter an item to search for" << endl;
+    cin >> target;
+    NodePtr result = search(head, target);
+    if (result == NULL)
+        cout << target << " is not on the list." << endl;
+    else
+        cout << target << " is on the list." << endl;
+
+    // TO-DO
+    // Add the option to insert a node in a middle position
+    string insertItem, previousItem;
+    int insertCount;
+    cout << "Enter the item to insert" << endl;
+    cin >> insertItem;
+    cout << "Enter the number of items to insert" << endl;
+    cin >> insertCount;
+    cout << "Enter the item in the previous position" << endl;
+    cin >> previousItem;
+    NodePtr afterMeptr = search(head, previousItem);
+    insert(afterMeptr, insertItem, insertCount);
+    cout << "The new list contains :" << endl;
+    show_list(head);
+
+    string deleteItem;
+    previousItem = "";
+    NodePtr discardPtr;
+    cout << "Enter the item to delete" << endl;
+    cin >> deleteItem;
+    cout << "Enter the item in the previous position" << endl;
+    cin >> previousItem;
+    NodePtr beforePtr = search(head, previousItem);
+
+    discardPtr = beforePtr->link;
+    remove(beforePtr, discardPtr);
+
+    cout << "The new list contains :" << endl;
+    show_list(head);
+
+    NodePtr expList = NULL;
+    int month, day, year;
+    cout << "Enter the expiration month (mm)" << endl;
+    cin >> month;
+    cout << "Enter the expiration day (dd)" << endl;
+    cin >> day;
+    cout << "Enter the expiration year (yyyy)" << endl;
+    cin >> year;
+
+    expList = searchExpiredItems(head, { month, day, year });
+    cout << "The list of expired items contains :" << endl;
+    show_list(expList);
+    return 0;
+}
+/* Function to insert a node at the head of the list
+head is a pointer to the head node of the list,
+the name of the item and the number of units is provided
+ */
+void head_insert(NodePtr& head, string itemName, int numberUnits, Date expirationDate)
+{
+    NodePtr temp_ptr;
+    temp_ptr = new Node;
+    temp_ptr->item = itemName;
+    temp_ptr->count = numberUnits;
+    temp_ptr->link = head;
+    head = temp_ptr;
+}
+
+NodePtr search(NodePtr head, string target)
+{
+
+    NodePtr here = head;
+    if (here == NULL) {
+        return NULL;
+    }
+    else {
+        while (here->item != target && here->link != NULL) {
+            here = here->link;
+        }
+        if (here->item == target) {
+            return here;
+        }
+        return NULL;
+    }
+
+}
+
+/* Function to insert a node at the position on the list
+after_me is a pointer to the item in previous position the list,
+the name of the item ' an_item" and the number of units "a_number" is
+provided
+ */
+void insert(NodePtr after_me, string an_item, int a_number)
+{
+    NodePtr head = after_me;
+    NodePtr tempPtr = new Node;
+    tempPtr->item = an_item;
+    tempPtr->count = a_number;
+    if (after_me == NULL) {
+        tempPtr->link = head;
+        head = tempPtr;
+    }
+    else {
+        NodePtr tempNode = after_me->link;
+        after_me->link = tempPtr;
+        tempPtr->link = tempNode;
+    }
+
+}
+void show_list(NodePtr& head)
+{
+    NodePtr here = head;
+    while (here != NULL)
+    {
+        cout << here->item << ", ";
+        here = here->link;
+    }
+    cout << endl;
+}
+/* Function to delete an item (node) at a certain position on the list
+"before" is a pointer to the item in previous position the list, and
+"discard" is the pointer to the item to be removed.
+Conditions: both before and discard are not NULL, before->link and
+discard point to the same node, discard points to a dynamic node
+post: the node pointed by discard is removed from the linked list, and it is
+freed */
+void remove(NodePtr before, NodePtr discard) {
+    before->link = discard->link;
+    delete discard;
+}
+/* Function to search items on the list with an older expiration date
+head is a pointer to the head node of the list,
+a_date is a Date element that contains the cutting date target,
+if the item has the same or older date it would be an expired item.
+A list of expired items needs to be created and the function will
+returns a Node pointer to the head node of that list. If the list is empty
+it returns a NULL pointer (or nullptr) */
+
+NodePtr searchExpiredItems(NodePtr head, Date a_date)
+{
+    NodePtr expiredList = NULL;
+    NodePtr expiredListTail = NULL;
+    NodePtr curr = head;
+    while (curr != NULL) {
+        if (curr->expiration.year < a_date.year ||
+            (curr->expiration.year == a_date.year && curr->expiration.month < a_date.month) ||
+            (curr->expiration.year == a_date.year && curr->expiration.month == a_date.month && curr->expiration.day <= a_date.day)) {
+            if (expiredList == NULL) {
+                // List is empty
+                head_insert(expiredList, curr->item, curr->count, { 12, 25, 2023 });
+                expiredListTail = expiredList;
+            }
+            else {
+                // List is not empty
+                head_insert(expiredListTail->link, curr->item, curr->count, { 12, 25, 2023 });
+                expiredListTail = expiredListTail->link;
+            }
+        }
+        curr = curr->link;
+    }
+    return expiredList;
+
+}
+
